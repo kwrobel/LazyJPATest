@@ -28,7 +28,7 @@ public class LazyJPATest {
     private static final String CONFIG_FILE = "/META-INF/config.properties";
     private static final String PROP_PU = "persistence_unit_name";
 
-    private final EntityManager em;
+    private EntityManager em;
     private List<Customer> customers;
     private Properties config;
 
@@ -53,11 +53,9 @@ public class LazyJPATest {
             this.config.load(configStream);
         } catch (FileNotFoundException ex) {
             Logger.getLogger(LazyJPATest.class.getName()).log(Level.SEVERE, "{0} file not found in {1}!", CONFIG_FILE);
-            this.em = null;
             return;
         } catch (IOException ex) {
             Logger.getLogger(LazyJPATest.class.getName()).log(Level.SEVERE, "Error reading properties from {0} file: {1}", new Object[]{CONFIG_FILE, ex.getMessage()});
-            this.em = null;
             return;
         }
 
