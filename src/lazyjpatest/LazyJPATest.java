@@ -5,7 +5,13 @@
  */
 package lazyjpatest;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
@@ -19,30 +25,52 @@ import lazyjpatest.entity.PurchaseOrder;
  */
 public class LazyJPATest {
 
+    private static final String CONFIG_FILE = "/META-INF/config.properties";
+    private static final String PROP_PU = "persistence_unit_name";
+
     private final EntityManager em;
     private List<Customer> customers;
+    Properties config;
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
         LazyJPATest test = new LazyJPATest();
-        test.getCustomers();
-        test.printCustomers();
+        if (test.em != null) {
+            test.getCustomers();
+            test.printCustomers();
+        } else {
+            Logger.getLogger(LazyJPATest.class.getName()).log(Level.WARNING, "Cannot run test without a configured entity manager!");
+        }
         System.exit(0);
     }
 
     public LazyJPATest() {
-        // NOTE: - Use LazyJPAOpenJPATestPU   for testing persistence unit using OpenJPA   JPA provider
-        //       - Use LazyJPAHibernateTestPU for testing persistence unit using Hibernate JPA provider
-        this.em = Persistence.createEntityManagerFactory("LazyJPAHibernateTestPU").createEntityManager();
+        try {
+            InputStream configStream = LazyJPATest.class.getResourceAsStream(CONFIG_FILE);
+            this.config = new Properties();
+            this.config.load(configStream);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(LazyJPATest.class.getName()).log(Level.SEVERE, "{0} file not found in {1}!", CONFIG_FILE);
+            this.em = null;
+            return;
+        } catch (IOException ex) {
+            Logger.getLogger(LazyJPATest.class.getName()).log(Level.SEVERE, "Error reading properties from {0} file: {1}", new Object[]{CONFIG_FILE, ex.getMessage()});
+            this.em = null;
+            return;
+        }
+
+        String persistenceUnit = this.config.getProperty(PROP_PU);
+        this.em = Persistence.createEntityManagerFactory(persistenceUnit).createEntityManager();
     }
+
     public void getCustomers() {
         TypedQuery<Customer> customersQuery = em.createNamedQuery("Customer.findAll", Customer.class);
         try {
             customers = customersQuery.getResultList();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Logger.getLogger(LazyJPATest.class.getName()).log(Level.SEVERE, "Could not retrieve customers: {0}", ex.getMessage());
         }
     }
 
@@ -72,5 +100,5 @@ public class LazyJPATest {
                 }
             }
         }
-    }    
+    }
 }
