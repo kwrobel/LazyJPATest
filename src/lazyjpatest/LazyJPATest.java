@@ -30,7 +30,7 @@ public class LazyJPATest {
 
     private final EntityManager em;
     private List<Customer> customers;
-    Properties config;
+    private Properties config;
 
     /**
      * @param args the command line arguments
