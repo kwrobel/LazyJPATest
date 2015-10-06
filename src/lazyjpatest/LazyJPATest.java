@@ -5,7 +5,6 @@
  */
 package lazyjpatest;
 
-import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
@@ -20,9 +19,8 @@ import lazyjpatest.entity.PurchaseOrder;
  */
 public class LazyJPATest {
 
+    private final EntityManager em;
     private List<Customer> customers;
-    private List<DiscountCode> discountCodes;
-    private EntityManager em;
 
     /**
      * @param args the command line arguments
